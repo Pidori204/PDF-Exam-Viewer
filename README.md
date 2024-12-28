@@ -1,5 +1,5 @@
 # PDF-Exam-Viewer
-Will come handy for taking testing yourself with PDF-based exams!
+Will come handy for taking tests yourself with PDF-based exams!
 
 This is a HTML-based project and lets you take exams from PDF-based exams, highlight questions, choose answers (with shortcuts available!), mark questions for later review. All exam datas are saved in the browser with "localStorage" method, matched with each PDF you view. 
 
