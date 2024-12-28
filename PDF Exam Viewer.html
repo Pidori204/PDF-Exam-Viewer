@@ -163,6 +163,21 @@
     font-weight: bold;
     margin-top: 20px;
 }
+	    .floating-timer {
+    position: fixed;
+    bottom: 100px;  /* floating-controls 위에 위치하도록 조정 */
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 24px;
+    font-weight: bold;
+    z-index: 997;  /* floating-controls(998)보다 낮게 설정 */
+    backdrop-filter: blur(5px);
+    display: none;  /* 초기에는 숨김 */
+}
        #pdfContainer {
     flex-grow: 1;
     position: relative;
@@ -347,6 +362,8 @@
         <div class="timer-display">00:00:00</div>
     </div>
 </div>
+	
+<div id="floatingTimer" class="floating-timer">00:00:00</div>
 
     <div id="pdfContainer">
         <canvas id="canvas"></canvas>
@@ -401,7 +418,8 @@ let isTimerRunning = false;
 const timerModal = document.getElementById('timerModal');
 const timerButton = document.getElementById('timerButton');
 const closeTimer = document.querySelector('.close-timer');
-
+const floatingTimer = document.getElementById('floatingTimer');
+	
 timerButton.onclick = function() {
     timerModal.style.display = "block";
 }
@@ -427,13 +445,18 @@ function updateTimerDisplay() {
     const minutes = Math.floor((timeLeft % 3600) / 60);
     const seconds = timeLeft % 60;
     
-    timerDisplay.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    const timeString = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    
+    // 모달의 타이머 디스플레이 업데이트
+    timerDisplay.textContent = timeString;
+    // 플로팅 타이머 업데이트
+    floatingTimer.textContent = timeString;
 }
 
+// startTimer 함수 수정
 function startTimer() {
     if (!isTimerRunning) {
         if (timeLeft === 0) {
-            // 입력값으로부터 시간 계산
             const hours = parseInt(document.getElementById('hours').value) || 0;
             const minutes = parseInt(document.getElementById('minutes').value) || 0;
             const seconds = parseInt(document.getElementById('seconds').value) || 0;
@@ -442,6 +465,9 @@ function startTimer() {
         }
         
         isTimerRunning = true;
+        floatingTimer.style.display = "block";  // 타이머 시작시 플로팅 타이머 표시
+        timerModal.style.display = "none";      // 모달 닫기
+        
         timerInterval = setInterval(() => {
             if (timeLeft > 0) {
                 timeLeft--;
@@ -449,6 +475,7 @@ function startTimer() {
             } else {
                 clearInterval(timerInterval);
                 isTimerRunning = false;
+                floatingTimer.style.display = "none";  // 타이머 종료시 플로팅 타이머 숨김
                 alert('Time is up!');
             }
         }, 1000);
@@ -460,6 +487,7 @@ function pauseTimer() {
     isTimerRunning = false;
 }
 
+// resetTimer 함수 수정
 function resetTimer() {
     clearInterval(timerInterval);
     isTimerRunning = false;
@@ -468,11 +496,17 @@ function resetTimer() {
     document.getElementById('minutes').value = 0;
     document.getElementById('seconds').value = 0;
     updateTimerDisplay();
+    floatingTimer.style.display = "none";  // 리셋시 플로팅 타이머 숨김
 }
+
 
 startButton.addEventListener('click', startTimer);
 pauseButton.addEventListener('click', pauseTimer);
 resetButton.addEventListener('click', resetTimer);
+	// 플로팅 타이머 클릭 시 모달 표시
+floatingTimer.addEventListener('click', () => {
+    timerModal.style.display = "block";
+});
 
 // 입력값 제한
 document.getElementById('hours').addEventListener('input', function() {
