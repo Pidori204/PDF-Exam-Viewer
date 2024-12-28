@@ -165,7 +165,7 @@
 }
 	    .floating-timer {
     position: fixed;
-    bottom: 100px;  /* floating-controls 위에 위치하도록 조정 */
+    bottom: 100px;
     left: 50%;
     transform: translateX(-50%);
     background: rgba(0, 0, 0, 0.5);
@@ -174,9 +174,11 @@
     border-radius: 8px;
     font-size: 24px;
     font-weight: bold;
-    z-index: 997;  /* floating-controls(998)보다 낮게 설정 */
+    z-index: 997;
     backdrop-filter: blur(5px);
-    display: none;  /* 초기에는 숨김 */
+    display: none;
+    cursor: move; /* 드래그 가능함을 표시하는 커서 */
+    user-select: none; /* 텍스트 선택 방지 */
 }
        #pdfContainer {
     flex-grow: 1;
@@ -466,8 +468,15 @@ function startTimer() {
         }
         
         isTimerRunning = true;
-        floatingTimer.style.display = "block";  // 타이머 시작시 플로팅 타이머 표시
-        timerModal.style.display = "none";      // 모달 닫기
+        floatingTimer.style.display = "block";
+        timerModal.style.display = "none";
+        
+        // 타이머 시작 시 중앙 위치로 초기화
+        xOffset = 0;
+        yOffset = 0;
+        setTranslate(0, 0, floatingTimer);
+        floatingTimer.style.left = '50%';
+        floatingTimer.style.bottom = '100px';
         
         timerInterval = setInterval(() => {
             if (timeLeft > 0) {
@@ -476,7 +485,7 @@ function startTimer() {
             } else {
                 clearInterval(timerInterval);
                 isTimerRunning = false;
-                floatingTimer.style.display = "none";  // 타이머 종료시 플로팅 타이머 숨김
+                floatingTimer.style.display = "none";
                 alert('Time is up!');
             }
         }, 1000);
@@ -505,8 +514,13 @@ startButton.addEventListener('click', startTimer);
 pauseButton.addEventListener('click', pauseTimer);
 resetButton.addEventListener('click', resetTimer);
 	// 플로팅 타이머 클릭 시 모달 표시
-floatingTimer.addEventListener('click', () => {
-    timerModal.style.display = "block";
+let lastClickTime = 0;
+floatingTimer.addEventListener('click', (e) => {
+    const clickTime = new Date().getTime();
+    if (clickTime - lastClickTime < 200) { // 더블클릭 시간 임계값
+        timerModal.style.display = "block";
+    }
+    lastClickTime = clickTime;
 });
 
 // 입력값 제한
@@ -525,6 +539,77 @@ document.getElementById('seconds').addEventListener('input', function() {
     if (this.value < 0) this.value = 0;
 });
 
+// 드래그 관련 변수
+let isDragging = false;
+let currentX;
+let currentY;
+let initialX;
+let initialY;
+let xOffset = 0;
+let yOffset = 0;
+
+// 드래그 이벤트 핸들러
+function dragStart(e) {
+    if (e.type === "touchstart") {
+        initialX = e.touches[0].clientX - xOffset;
+        initialY = e.touches[0].clientY - yOffset;
+    } else {
+        initialX = e.clientX - xOffset;
+        initialY = e.clientY - yOffset;
+    }
+
+    if (e.target === floatingTimer) {
+        isDragging = true;
+    }
+}
+
+function dragEnd(e) {
+    initialX = currentX;
+    initialY = currentY;
+    isDragging = false;
+}
+
+function drag(e) {
+    if (isDragging) {
+        e.preventDefault();
+
+        if (e.type === "touchmove") {
+            currentX = e.touches[0].clientX - initialX;
+            currentY = e.touches[0].clientY - initialY;
+        } else {
+            currentX = e.clientX - initialX;
+            currentY = e.clientY - initialY;
+        }
+
+        xOffset = currentX;
+        yOffset = currentY;
+
+        // 화면 경계를 벗어나지 않도록 제한
+        const rect = floatingTimer.getBoundingClientRect();
+        const maxX = window.innerWidth - rect.width;
+        const maxY = window.innerHeight - rect.height;
+
+        currentX = Math.min(Math.max(currentX, 0), maxX);
+        currentY = Math.min(Math.max(currentY, 0), maxY);
+
+        setTranslate(currentX, currentY, floatingTimer);
+    }
+}
+
+function setTranslate(xPos, yPos, el) {
+    el.style.transform = `translate(${xPos}px, ${yPos}px)`;
+}
+
+// 이벤트 리스너 추가
+floatingTimer.addEventListener("touchstart", dragStart, false);
+floatingTimer.addEventListener("touchend", dragEnd, false);
+floatingTimer.addEventListener("touchmove", drag, false);
+
+floatingTimer.addEventListener("mousedown", dragStart, false);
+document.addEventListener("mousemove", drag, false);
+document.addEventListener("mouseup", dragEnd, false);
+
+	
 
 async function calculatePdfHash(arrayBuffer) {
     try {
