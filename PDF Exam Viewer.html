@@ -334,7 +334,8 @@
 	<button class="header-button" onclick="clearCurrentPageData()">Reset this page
 	<button class="header-button" id="timerButton">Timer</button>
         </div>
-	    <div id="floatingTimer" class="floating-timer">00:00:00</div>
+	    <div id="headerTimer" style="display: none; font-weight: bold; font-size: 1.2rem;">00:00:00</div>
+        <button class="header-button" id="timerButton">Timer</button>
 	    <a href="https://github.com/Pidori204/PDF-Exam-Viewer/" target="_blank" class="github-link">
         <svg height="32" aria-hidden="true" viewBox="0 0 16 16" version="1.1" width="32">
             <path fill="#333" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path>
@@ -442,6 +443,7 @@ const startButton = document.getElementById('startTimer');
 const pauseButton = document.getElementById('pauseTimer');
 const resetButton = document.getElementById('resetTimer');
 const timerDisplay = document.querySelector('.timer-display');
+const headerTimer = document.getElementById('headerTimer');
 
 function updateTimerDisplay() {
     const hours = Math.floor(timeLeft / 3600);
@@ -452,9 +454,10 @@ function updateTimerDisplay() {
     
     // 모달의 타이머 디스플레이 업데이트
     timerDisplay.textContent = timeString;
-    // 플로팅 타이머 업데이트
-    floatingTimer.textContent = timeString;
+    // 헤더 타이머 업데이트
+    headerTimer.textContent = timeString;
 }
+
 
 // startTimer 함수 수정
 function startTimer() {
@@ -468,15 +471,8 @@ function startTimer() {
         }
         
         isTimerRunning = true;
-        floatingTimer.style.display = "block";
-        timerModal.style.display = "none";
-        
-        // 타이머 시작 시 중앙 위치로 초기화
-        xOffset = 0;
-        yOffset = 0;
-        setTranslate(0, 0, floatingTimer);
-        floatingTimer.style.left = '50%';
-        floatingTimer.style.bottom = '100px';
+        headerTimer.style.display = "block";  // 헤더 타이머 표시
+        timerModal.style.display = "none";    // 모달 닫기
         
         timerInterval = setInterval(() => {
             if (timeLeft > 0) {
@@ -485,7 +481,7 @@ function startTimer() {
             } else {
                 clearInterval(timerInterval);
                 isTimerRunning = false;
-                floatingTimer.style.display = "none";
+                headerTimer.style.display = "none";  // 타이머 종료시 헤더 타이머 숨김
                 alert('Time is up!');
             }
         }, 1000);
@@ -506,7 +502,7 @@ function resetTimer() {
     document.getElementById('minutes').value = 0;
     document.getElementById('seconds').value = 0;
     updateTimerDisplay();
-    floatingTimer.style.display = "none";  // 리셋시 플로팅 타이머 숨김
+    headerTimer.style.display = "none";  // 리셋시 헤더 타이머 숨김
 }
 
 
@@ -515,12 +511,8 @@ pauseButton.addEventListener('click', pauseTimer);
 resetButton.addEventListener('click', resetTimer);
 	// 플로팅 타이머 클릭 시 모달 표시
 let lastClickTime = 0;
-floatingTimer.addEventListener('click', (e) => {
-    const clickTime = new Date().getTime();
-    if (clickTime - lastClickTime < 200) { // 더블클릭 시간 임계값
-        timerModal.style.display = "block";
-    }
-    lastClickTime = clickTime;
+headerTimer.addEventListener('click', () => {
+    timerModal.style.display = "block";
 });
 
 // 입력값 제한
