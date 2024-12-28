@@ -739,7 +739,12 @@ function clearCurrentPageData() {
     
 
     answers[pageNum - 1] = null;
-    
+    if (markedQuestions.has(pageNum)) {
+        markedQuestions.delete(pageNum);
+	markButton.classList.remove('marked');
+    } else {
+    }
+
 
     savePdfData();
     renderPage();
