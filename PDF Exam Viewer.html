@@ -420,7 +420,7 @@ let isTimerRunning = false;
 const timerModal = document.getElementById('timerModal');
 const timerButton = document.getElementById('timerButton');
 const closeTimer = document.querySelector('.close-timer');
-const floatingTimer = document.getElementById('floatingTimer');
+
 	
 timerButton.onclick = function() {
     timerModal.style.display = "block";
@@ -529,77 +529,8 @@ document.getElementById('seconds').addEventListener('input', function() {
     if (this.value < 0) this.value = 0;
 });
 
-// 드래그 관련 변수
-let isDragging = false;
-let currentX;
-let currentY;
-let initialX;
-let initialY;
-let xOffset = 0;
-let yOffset = 0;
 
-// 드래그 이벤트 핸들러
-function dragStart(e) {
-    if (e.type === "touchstart") {
-        initialX = e.touches[0].clientX - xOffset;
-        initialY = e.touches[0].clientY - yOffset;
-    } else {
-        initialX = e.clientX - xOffset;
-        initialY = e.clientY - yOffset;
-    }
 
-    if (e.target === floatingTimer) {
-        isDragging = true;
-    }
-}
-
-function dragEnd(e) {
-    initialX = currentX;
-    initialY = currentY;
-    isDragging = false;
-}
-
-function drag(e) {
-    if (isDragging) {
-        e.preventDefault();
-
-        if (e.type === "touchmove") {
-            currentX = e.touches[0].clientX - initialX;
-            currentY = e.touches[0].clientY - initialY;
-        } else {
-            currentX = e.clientX - initialX;
-            currentY = e.clientY - initialY;
-        }
-
-        xOffset = currentX;
-        yOffset = currentY;
-
-        // 화면 경계를 벗어나지 않도록 제한
-        const rect = floatingTimer.getBoundingClientRect();
-        const maxX = window.innerWidth - rect.width;
-        const maxY = window.innerHeight - rect.height;
-
-        currentX = Math.min(Math.max(currentX, 0), maxX);
-        currentY = Math.min(Math.max(currentY, 0), maxY);
-
-        setTranslate(currentX, currentY, floatingTimer);
-    }
-}
-
-function setTranslate(xPos, yPos, el) {
-    el.style.transform = `translate(${xPos}px, ${yPos}px)`;
-}
-
-// 이벤트 리스너 추가
-floatingTimer.addEventListener("touchstart", dragStart, false);
-floatingTimer.addEventListener("touchend", dragEnd, false);
-floatingTimer.addEventListener("touchmove", drag, false);
-
-floatingTimer.addEventListener("mousedown", dragStart, false);
-document.addEventListener("mousemove", drag, false);
-document.addEventListener("mouseup", dragEnd, false);
-
-	
 
 async function calculatePdfHash(arrayBuffer) {
     try {
