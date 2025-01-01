@@ -11,3 +11,5 @@ https://pidori204.github.io/PDF-Exam-Viewer/PDF%20Exam%20Viewer
 
 Have fun!
 
+
+**This program currently fully functions on PC version of web browsers only. (Best on Chromium browsers)**
